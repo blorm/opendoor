@@ -1,5 +1,6 @@
 import requests
 import datetime
+import time
 import json
 import yaml
 
@@ -36,15 +37,20 @@ if __name__ == '__main__':
   headers = config['headers']
   
   today = str(datetime.datetime.today())
-  filename = today[:19] # 2018-03-02 17:53:54
+  filename = today[:19].replace(':', '-') # 2018-03-02 17:53:54
   city_lenth = {}
-  with open('%s.json' % filename, 'w') as f:
+  with open('history/%s.json' % filename, 'w') as f:
     f.write('{')
     for c in city:
       f.write('\n"%s":' % c)
       urlc = url + c
       page = requests.get(urlc, headers=headers)
-      print c, page.status_code, len(page.text)
+      print c, page.status_code, len(page.text), page.text[:10]
+      while len(page.text) > 0 and page.text[0] != '[':
+        print 'error: no list returned! sleeping 3s...'
+        time.sleep(3)
+        page = requests.get(urlc, headers=headers)
+        print c, page.status_code, len(page.text), page.text[:10]
       city_lenth[c] = len(page.text) / 1024
       text = page.text.encode('utf-8')
       f.write(text)

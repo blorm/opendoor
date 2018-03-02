@@ -119,7 +119,7 @@ if __name__ == '__main__':
   
   filename = config['filename']
   try:
-    with open('%s.json' % filename, 'r') as f:
+    with open('history/%s.json' % filename, 'r') as f:
       all = f.read().strip()
   except IOError:
     print '404: %s.json not found!' % filename
