@@ -9,7 +9,7 @@ def getfromfile(c):
   return text
 
 
-def slack(lenth):
+def slack(city_lenth):
   if config['slack_toggle']:
     text = '```*Opendoor*: %s UTC' % (today[:19])
     summ = 0
@@ -36,8 +36,9 @@ if __name__ == '__main__':
   headers = config['headers']
   
   today = str(datetime.datetime.today())
+  filename = today[:19] # 2018-03-02 17:53:54
   city_lenth = {}
-  with open('%s.json' % today[:10], 'w') as f:
+  with open('%s.json' % filename, 'w') as f:
     f.write('{')
     for c in city:
       f.write('\n"%s":' % c)
@@ -53,5 +54,8 @@ if __name__ == '__main__':
 
   slack(city_lenth)
   
+  config['filename'] = filename
+  with open('config.yml', 'w') as f:
+    yaml.dump(config, f)
   # print page.text
   

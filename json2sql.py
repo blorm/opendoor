@@ -21,20 +21,20 @@ def json2sql(house):
   ]
   value = {}
   value['source'] =     'opendoor'
-  value['source_id'] =  house['id']             if 'id' in house else 'none'
-  value['latitude'] =   house['lonlat'][1]      if 'lonlat' in house else 'none'
-  value['longitude'] =  house['lonlat'][0]      if 'lonlat' in house else 'none'
-  value['squarefeet'] = house['square_footage'] if 'square_footage' in house else 'none'
-  value['bathrooms'] =  house['bathrooms']      if 'bathrooms' in house else 'none'
-  value['bedrooms'] =   house['bedrooms']       if 'bedrooms' in house else 'none'
-  value['yearbuilt'] =  house['year_built']     if 'year_built' in house else 'none'
+  value['source_id'] =  house['id']             if 'id' in house else None
+  value['latitude'] =   house['lonlat'][1]      if 'lonlat' in house else None
+  value['longitude'] =  house['lonlat'][0]      if 'lonlat' in house else None
+  value['squarefeet'] = house['square_footage'] if 'square_footage' in house else None
+  value['bathrooms'] =  house['bathrooms']      if 'bathrooms' in house else None
+  value['bedrooms'] =   house['bedrooms']       if 'bedrooms' in house else None
+  value['yearbuilt'] =  house['year_built']     if 'year_built' in house else None
   if 'address' in house:
-    value['address1'] = house['address']['street1']     if 'street1' in house['address'] else 'none'
-    value['zip'] =      house['address']['postal_code'] if 'postal_code' in house['address'] else 'none'
-    value['city'] =     house['address']['city']        if 'city' in house['address'] else 'none'
-    value['state'] =    house['address']['state']       if 'state' in house['address'] else 'none'
-  value['listprice'] =  house['price_cents'] / 100.0    if 'price_cents' in house else 'none'
-  value['status'] = house['display_state']              if 'display_state' in house else 'none'
+    value['address1'] = house['address']['street1']     if 'street1' in house['address'] else None
+    value['zip'] =      house['address']['postal_code'] if 'postal_code' in house['address'] else None
+    value['city'] =     house['address']['city']        if 'city' in house['address'] else None
+    value['state'] =    house['address']['state']       if 'state' in house['address'] else None
+  value['listprice'] =  house['price_cents'] / 100.0    if 'price_cents' in house else None
+  value['status'] = house['display_state']              if 'display_state' in house else None
   try:
     value['imgurl'] = house['listing_photos'][0]['thumbnail_urls'].values()[0]
   except:
@@ -50,12 +50,15 @@ def json2sql(house):
     setstr = ''
     for key in value:
       i = value[key]
-      if isinstance(i, str) or isinstance(i, unicode):
+      if i == None:
+        i = 'null'
+      elif isinstance(i, str) or isinstance(i, unicode):
         i = "'%s'" % i
       setstr += '%s = %s, ' % (key, i)
     setstr = setstr[:-2]
-    sql = "UPDATE %s SET %s WHERE source_id=%s;" % (table, setstr, house['id'])
-    print 'update:', sql
+    sql = "UPDATE %s SET %s WHERE source_id=%s and source='opendoor';" \
+                  % (table, setstr, house['id'])
+    # print 'update:', sql
   else:
     columns = ''.join([i + ', ' for i in columnlist])[:-2]
     # print columns
@@ -66,15 +69,15 @@ def json2sql(house):
         i = 'null'
       elif isinstance(i, str) or isinstance(i, unicode):
         i = "'%s'" % i
-      valuestr += str(i) + ', '
+      valuestr += unicode(i) + ', '
     valuestr = valuestr[:-2]
     # print [valuestr]
-    # sql = "INSERT INTO %s (%s) VALUES (%s);" % (table, columns, valuestr)
+    sql = "INSERT INTO %s (%s) VALUES (%s);" % (table, columns, valuestr)
   cursor.execute(sql)
   conn.commit()
 
 def sql_exist(id):
-  sql = "SELECT * FROM %s WHERE source_id=%s;" % (table, str(id))
+  sql = "SELECT * FROM %s WHERE source_id=%s and source='opendoor';" % (table, str(id))
   cursor.execute(sql)
   results = cursor.fetchall()
   if len(results) > 0:
@@ -114,13 +117,12 @@ if __name__ == '__main__':
   table = 'property'
   cursor = conn.cursor()
   
-  today = str(datetime.today())
-  # today = '2018-03-01'
+  filename = config['filename']
   try:
-    with open('%s.json' % today[:10], 'r') as f:
+    with open('%s.json' % filename, 'r') as f:
       all = f.read().strip()
   except IOError:
-    print '404: %s.json not found!' % today[:10]
+    print '404: %s.json not found!' % filename
     exit()
   all = json.loads(all)
   updated = all['time']
@@ -135,7 +137,7 @@ if __name__ == '__main__':
     lenth[city] = len(houselist)
     for h in houselist:
       json2sql(h)
-      exit()
+      # exit()
       
   slack(lenth)
   conn.close()
