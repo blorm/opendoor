@@ -34,7 +34,7 @@ def json2sql(house):
     value['city'] =     house['address']['city']        if 'city' in house['address'] else 'none'
     value['state'] =    house['address']['state']       if 'state' in house['address'] else 'none'
   value['listprice'] =  house['price_cents'] / 100.0    if 'price_cents' in house else 'none'
-  value['status'] = house['display_state'] \            if 'display_state' in house and 'flip_state' in house else 'none'
+  value['status'] = house['display_state']              if 'display_state' in house else 'none'
   try:
     value['imgurl'] = house['listing_photos'][0]['thumbnail_urls'].values()[0]
   except:

@@ -1,0 +1,15 @@
+city: [phoenix, dallas, las_vegas, atlanta, orlando, raleigh]
+opendoorurl: https://www.opendoor.com/api/v1/listings/ordered_listings?active=true&pending=true&sold=true&market_name=
+headers: {
+    'user-agent': 'Mozilla/5.0 (Windows 10; Intel) Chrome/64.0.3282.140'
+  }
+slack_toggle: false
+slack_url: https://hooks.slack.com/services/T6
+log: all
+
+postgre:
+  db: a
+  user: a
+  password: a
+  host: 127.0.0.1
+  port: 5432
